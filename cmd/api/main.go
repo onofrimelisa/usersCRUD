@@ -2,16 +2,11 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
 	_ "github.com/mattn/go-sqlite3"
+	. "github.com/onofrimelisa/usersCRUD/internal/db"
+	. "github.com/onofrimelisa/usersCRUD/internal/user"
 	"log"
 )
-
-type User struct {
-	Id int `gorm:"AUTO_INCREMENT" form:"id" json:"id"`
-	Firstname string `gorm:"not null" form:"firstname" json:"firstname"`
-	Lastname  string `gorm:"not null" form:"lastname" json:"lastname"`
-}
 
 func main() {
 	r := gin.New()
@@ -41,7 +36,11 @@ func UpdateUser(c *gin.Context) {
 
 	if user.Id != 0 {
 		var newUser User
-		c.Bind(&newUser)
+		err := c.Bind(&newUser)
+
+		if err != nil {
+			log.Fatalln(err)
+		}
 
 		if !isEmpty(c, newUser.Firstname, newUser.Lastname) {
 			result := User{
@@ -88,7 +87,11 @@ func CreateUser(c *gin.Context) {
 	defer db.Close()
 
 	var user User
-	c.Bind(&user)
+	err := c.Bind(&user)
+
+	if err != nil {
+		log.Fatalln(err)
+	}
 
 	if !isEmpty(c, user.Firstname, user.Lastname) {
 		db.Create(&user)
@@ -121,21 +124,4 @@ func isEmpty(c *gin.Context, fields ...string) bool {
 	}
 
 	return false
-}
-
-func InitDb() *gorm.DB {
-	db, err := gorm.Open("sqlite3", "./users_app.db")
-
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	db.LogMode(true)
-
-	if !db.HasTable(&User{}) {
-		db.CreateTable(&User{})
-		db.Set("gorm:table_options", "ENGINE=InnoDB").CreateTable(&User{})
-	}
-
-	return db
 }
