@@ -2,7 +2,7 @@ package db
 
 import (
 	"github.com/jinzhu/gorm"
-	. "github.com/onofrimelisa/usersCRUD/internal/user"
+	. "github.com/onofrimelisa/usersCRUD/internal/models"
 	"log"
 )
 
@@ -15,9 +15,9 @@ func InitDb() *gorm.DB {
 
 	db.LogMode(true)
 
-	if !db.HasTable(&User{}) {
-		db.CreateTable(&User{})
-		db.Set("gorm:table_options", "ENGINE=InnoDB").CreateTable(&User{})
+	if !db.HasTable(&BaseUser{}) {
+		db.CreateTable(&BaseUser{})
+		db.Set("gorm:table_options", "ENGINE=InnoDB").CreateTable(&BaseUser{})
 	}
 
 	return db
